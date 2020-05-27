@@ -4,7 +4,7 @@ const videosRouter = require("./routes/videosRoutes");
 
 const app = express();
 
-const clientOrigin = `http://localhost:8080`;
+const clientOrigin = `http://localhost:8000`;
 
 // MIDDLEWARES
 app.use(express.json());

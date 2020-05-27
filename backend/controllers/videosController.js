@@ -12,32 +12,23 @@ const pool = require("../db/connect");
 };
 
  */
-exports.getAllVideos = (req, res) => {
-  // Open Db Connection
-  let db = connect(connectionModes.readOnly);
+exports.getAllVideos = async (req, res) => {
+  try {
+    const videos = await pool.query("SELECT * FROM videos");
 
-  let sql = `SELECT * FROM restaurant`;
-
-  let restaurants = [];
-
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      res.send(`Error fetching the restaurants: ${err.message}`);
-    }
-
-    restaurants = rows;
     res.status(200).json({
       status: "success",
       requestedAt: req.requestTime,
-      results: restaurants.length,
-      data: {
-        restaurants
-      }
+      data: videos.rows
     });
-  });
-
-  // close the database connection
-  closeDbConnection(db);
+  } catch (error) {
+    res.status(500).json({
+      status: "failure",
+      requestedAt: req.requestTime,
+      data: error.message
+    });
+    console.log(error.message);
+  }
 };
 
 exports.getVideo = async (req, res) => {
@@ -77,6 +68,19 @@ exports.getVideo = async (req, res) => {
       status: "failure",
       requestedAt: req.requestTime,
       data: error.message.split(",")[0]
+    });
+    console.log(error.message);
+  }
+};
+
+exports.uploadVideo = async (req, res) => {
+  try {
+    if (req.files) console.log(req.files);
+  } catch (error) {
+    res.status(500).json({
+      status: "failure",
+      requestedAt: req.requestTime,
+      data: error.message
     });
     console.log(error.message);
   }
