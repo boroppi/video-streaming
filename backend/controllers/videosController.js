@@ -1,17 +1,14 @@
 const fs = require("fs");
 const pool = require("../db/connect");
 
-/* exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.description) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Missing name or description"
-    });
-  }
-  next();
-};
+const redis = require("redis");
+const client = redis.createClient();
+const { promisify } = require("util");
+const getAsync = promisify(client.get).bind(client);
+const setAsync = promisify(client.setex).bind(client);
 
- */
+const REDIS_EXPIRY_DELAY = 60 * 60 * 48; // 2 days
+
 exports.getAllVideos = async (req, res) => {
   try {
     const videos = await pool.query("SELECT * FROM videos");
@@ -33,11 +30,31 @@ exports.getAllVideos = async (req, res) => {
 
 exports.getVideo = async (req, res) => {
   try {
-    const { id } = req.params;
+    let { title } = req.params;
+    const videoOnRedis = await getAsync(title);
+    let videoId = "";
 
-    const video = await pool.query("SELECT * FROM videos WHERE id = $1", [id]);
+    if (videoOnRedis) {
+      videoId = videoOnRedis.id;
+    } else {
+      let deslugyfiedTitle = title.replace(/-/g, " ").toLowerCase();
 
-    const path = `assets/${video.rows[0].id}.mp4`;
+      const video = await pool.query(
+        "SELECT id FROM videos WHERE LOWER(title) = $1",
+        [deslugyfiedTitle]
+      );
+
+      const success = await setAsync(
+        title,
+        REDIS_EXPIRY_DELAY,
+        JSON.stringify(vide.rows[0])
+      );
+      console.log("success setting to redis", { success });
+
+      videoId = video.rows[0].id;
+    }
+
+    const path = `assets/${videoId}.mp4`;
     const stat = fs.statSync(path);
     const fileSize = stat.size;
     const range = req.headers.range;
