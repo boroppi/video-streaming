@@ -4,17 +4,11 @@ import ReactPlayer from "react-player"
 
 import classes from "./Styles/video.module.css"
 
-const Video = ({ id }) => {
-  const [video, setVideo] = useState(null)
-
-  /*  useEffect(() => {
-    getVideo(id, data => setVideo(data))
-  }, []) */
-
+const Video = ({ title }) => {
   return (
     <div className={classes.container}>
       <ReactPlayer
-        url={`${process.env.API_URL}/videos/${id}`}
+        url={`${process.env.API_URL}/videos/${title}`}
         playing={true}
         controls={true}
       />
