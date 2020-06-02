@@ -12,7 +12,7 @@ const VideoPage = () => (
     <h1>Video</h1>
     <Video /> */}
     <Router>
-      <Video path="/video/:id" />
+      <Video path="/video/:title" />
     </Router>
   </Layout>
 )

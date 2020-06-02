@@ -1,19 +1,28 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useContext } from "react"
+import Context from "../context/AppContext"
 import getVideos from "../api/getVideos"
-
+import slugify from "slugify"
 import classes from "./Styles/videos.module.css"
 import { Link } from "gatsby"
 
 const Videos = () => {
-  const [videos, setVideos] = useState([])
+  const { dispatchContext, homeVideos } = useContext(Context)
+
   useEffect(() => {
-    getVideos(data => setVideos(data))
+    dispatchContext({ type: "setSelectedNavBar", payload: "home" })
+    if (homeVideos.length === 0) {
+      getVideos(value =>
+        dispatchContext({ type: "setHomeVideos", payload: value })
+      )
+    }
   }, [])
-  console.log(videos)
+
   return (
     <div className={classes.container}>
-      {videos.map(video => (
-        <Link to={`/video/${video.id}`}>{video.title}</Link>
+      {homeVideos.map(video => (
+        <Link to={`/video/${slugify(video.title, { lower: true })}`}>
+          {video.title}
+        </Link>
       ))}
     </div>
   )
