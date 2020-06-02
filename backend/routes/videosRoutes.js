@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.route("/").get(videosController.getAllVideos);
 
-router.route("/:id").get(videosController.getVideo);
+router.route("/:title").get(videosController.getVideo);
 
 router.route("/").post(videosController.uploadVideo);
 

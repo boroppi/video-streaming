@@ -31,11 +31,13 @@ exports.getAllVideos = async (req, res) => {
 exports.getVideo = async (req, res) => {
   try {
     let { title } = req.params;
+    console.log("video title", title)
+
     const videoOnRedis = await getAsync(title);
     let videoId = "";
-
+    console.log("redis video", videoOnRedis)
     if (videoOnRedis) {
-      videoId = videoOnRedis.id;
+      videoId = JSON.parse(videoOnRedis).id;
     } else {
       let deslugyfiedTitle = title.replace(/-/g, " ").toLowerCase();
 
@@ -43,11 +45,11 @@ exports.getVideo = async (req, res) => {
         "SELECT id FROM videos WHERE LOWER(title) = $1",
         [deslugyfiedTitle]
       );
-
+      console.log(video.rows[0])
       const success = await setAsync(
         title,
         REDIS_EXPIRY_DELAY,
-        JSON.stringify(vide.rows[0])
+        JSON.stringify(video.rows[0])
       );
       console.log("success setting to redis", { success });
 
